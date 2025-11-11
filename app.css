@@ -154,3 +154,80 @@ footer {
   opacity: 0.7;
   padding: 16px 0;
 }
+
+/* === Button Base === */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0 14px;
+  user-select: none;
+  outline: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease, opacity .15s ease, box-shadow .15s ease;
+  text-decoration: none; /* a/Link 일관성 */
+}
+
+/* 크기 (높이만 제어해서 레이아웃 영향 최소화) */
+.btn--sm { height: 32px; font-size: 14px; }
+.btn--md { height: 40px; font-size: 15px; }
+.btn--lg { height: 48px; font-size: 16px; }
+
+/* 폭 옵션 */
+.btn--block { width: 100%; }
+
+/* 변형(팔레트: 파랑/빨강/회색) */
+.btn--primary {
+  background: #1f6fff; /* 파랑 */
+  color: #fff;
+}
+.btn--primary:hover { background: #195ae0; }
+.btn--primary:active { background: #154dbe; }
+
+.btn--danger {
+  background: #e53935; /* 빨강 */
+  color: #fff;
+}
+.btn--danger:hover { background: #cc2f2b; }
+.btn--danger:active { background: #b62926; }
+
+.btn--ghost {
+  background: transparent; /* 회색 계열 보조 */
+  color: #333;
+  border-color: #c9ced6;
+}
+.btn--ghost:hover { background: rgba(0,0,0,.035); border-color: #b8bec6; }
+.btn--ghost:active { background: rgba(0,0,0,.06); }
+
+/* 상태 */
+.btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(31,111,255, .35); /* 포커스 링(파랑) */
+}
+.btn--disabled,
+.btn[disabled],
+.btn[aria-disabled="true"] {
+  opacity: .55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* 로딩 */
+.btn--loading { position: relative; }
+.btn__spinner {
+  display: inline-block;
+  flex: 0 0 auto;
+}
+.btn__icon { display: inline-flex; }
+.btn__icon--left { margin-right: 4px; }
+.btn__icon--right { margin-left: 4px; }
+.btn__label { display: inline-block; }
+
+/* 선호: 모션 감소 */
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+}

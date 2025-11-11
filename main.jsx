@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Home from './home';
 import Register from './register';
-
+import './app.css'; 
 /** ---------- 알림 상태 훅 ---------- */
 function useAlertState() {
   const [isAlert, setIsAlert] = useState(false);
