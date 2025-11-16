@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import Home from './home';
 import Register from './src/register';
+import Detail from './src/detail.jsx';   // 경로 수정
 import './app.css';
 
 /** ---------- 알림 상태 훅 ---------- */
@@ -11,6 +12,7 @@ function useAlertState() {
 
   useEffect(() => {
     const ctrl = new AbortController();
+
     (async () => {
       try {
         const res = await fetch('/api/alerts/active', {
@@ -19,11 +21,9 @@ function useAlertState() {
         });
         if (res.ok) {
           const d = await res.json();
-          // {active:true} 혹은 {alert:{...}} 같은 구조 가정
           setIsAlert(!!(d && (d.active || d.alert)));
         }
       } catch (_) {
-        // 서버 준비 전에는 ?alert=1 로 강제 알림 모드 진입 허용
         const q = new URLSearchParams(window.location.search);
         if (q.get('alert') === '1') setIsAlert(true);
       }
@@ -34,12 +34,7 @@ function useAlertState() {
       es = new EventSource('/api/alerts/stream', { withCredentials: true });
       es.addEventListener('alert.created', () => setIsAlert(true));
       es.addEventListener('alert.resolved', () => setIsAlert(false));
-      es.onerror = () => {
-        /* 필요 시 재시도/토스트 */
-      };
-    } catch (_) {
-      // SSE 미구현 시 무시
-    }
+    } catch (_) {}
 
     return () => {
       ctrl.abort();
@@ -50,8 +45,10 @@ function useAlertState() {
   return isAlert;
 }
 
-/** ---------- 레이아웃: 정상 모드 (도움 요청 없음) ---------- */
+/** ---------- 정상 레이아웃 ---------- */
 function NormalLayout() {
+  const navigate = useNavigate();  // detail page 경로 추가됨
+
   return (
     <div
       style={{
@@ -65,7 +62,7 @@ function NormalLayout() {
           'Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", Arial, sans-serif',
       }}
     >
-      {/* 상단 구분선 */}
+
       <div
         style={{
           width: 1280,
@@ -77,7 +74,7 @@ function NormalLayout() {
         }}
       />
 
-      {/* 좌측 큰 카드 (도움 요청 없음 + 부엉이) */}
+      {/* 왼쪽 카드 */}
       <div
         style={{
           width: 575,
@@ -89,6 +86,7 @@ function NormalLayout() {
           borderRadius: 20,
         }}
       />
+
       <div
         style={{
           width: 443.77,
@@ -100,9 +98,10 @@ function NormalLayout() {
           color: 'black',
           fontSize: 40,
           fontWeight: 500,
+          cursor: 'pointer',
           lineHeight: '22px',
-          wordWrap: 'break-word',
         }}
+       // onClick={() => navigate('/detail')}   // 정상 이동
       >
         도움 요청이
         <br />
@@ -110,6 +109,7 @@ function NormalLayout() {
         존재하지 않습니다
         <br />
       </div>
+
       <img
         style={{
           width: 203,
@@ -122,7 +122,7 @@ function NormalLayout() {
         alt="도움 요청 없음 캐릭터"
       />
 
-      {/* 상단 로고 / 메뉴 */}
+      {/* 상단 로고 */}
       <div
         style={{
           width: 369,
@@ -135,11 +135,11 @@ function NormalLayout() {
           fontSize: 50,
           fontWeight: 300,
           lineHeight: '22px',
-          textShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
         }}
       >
         SMARTSHIELD
       </div>
+
       <div
         style={{
           width: 770,
@@ -157,7 +157,7 @@ function NormalLayout() {
         정보 수정
       </div>
 
-      {/* 우측 상단: 영상 내역 카드 */}
+      {/* 오른쪽 영상 내역 패널 */}
       <div
         style={{
           width: 550,
@@ -169,7 +169,7 @@ function NormalLayout() {
           borderRadius: 20,
         }}
       />
-      {/* 제목 */}
+
       <div
         style={{
           width: 177,
@@ -181,12 +181,11 @@ function NormalLayout() {
           color: 'black',
           fontSize: 40,
           fontWeight: 500,
-          lineHeight: '22px',
         }}
       >
         영상 내역
       </div>
-      {/* 설명 */}
+
       <div
         style={{
           width: 371,
@@ -198,14 +197,13 @@ function NormalLayout() {
           fontSize: 20,
           fontWeight: 300,
           lineHeight: '22px',
-          wordWrap: 'break-word',
         }}
       >
         현장의 전체 영상 및
         <br />
         위험 상황 영상을 확인할 수 있습니다.
       </div>
-      {/* 흰 카드 2개 */}
+
       <div
         style={{
           width: 470,
@@ -217,6 +215,7 @@ function NormalLayout() {
           borderRadius: 20,
         }}
       />
+
       <div
         style={{
           width: 470,
@@ -228,37 +227,28 @@ function NormalLayout() {
           borderRadius: 20,
         }}
       />
-      {/* 전체 영상 확인하기 버튼 */}
+
       <button
         type="button"
         style={{
           width: 460,
           height: 50,
-          paddingLeft: 123,
-          paddingRight: 123,
-          paddingTop: 15,
-          paddingBottom: 15,
           left: 677,
           top: 416,
           position: 'absolute',
           background: '#096BC7',
-          overflow: 'hidden',
-          borderRadius: 6,
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 10,
-          display: 'inline-flex',
-          border: 'none',
-          cursor: 'pointer',
           color: 'white',
+          border: 'none',
+          borderRadius: 6,
           fontSize: 16,
           fontWeight: 600,
+          cursor: 'pointer',
         }}
       >
         전체 영상 확인하기
       </button>
 
-      {/* 우측 하단: 경위서 작성 카드 */}
+      {/* 경위서 작성 패널 */}
       <div
         style={{
           width: 550,
@@ -270,7 +260,7 @@ function NormalLayout() {
           borderRadius: 20,
         }}
       />
-      {/* 제목 */}
+
       <div
         style={{
           width: 195,
@@ -282,12 +272,11 @@ function NormalLayout() {
           color: 'black',
           fontSize: 40,
           fontWeight: 500,
-          lineHeight: '22px',
         }}
       >
         경위서 작성
       </div>
-      {/* 설명 */}
+
       <div
         style={{
           width: 287,
@@ -299,14 +288,13 @@ function NormalLayout() {
           fontSize: 20,
           fontWeight: 300,
           lineHeight: '22px',
-          wordWrap: 'break-word',
         }}
       >
         AI가 영상을 확인하고 요약하여
         <br />
         상황에 맞는 경위서를 작성해줍니다.
       </div>
-      {/* 흰 카드 */}
+
       <div
         style={{
           width: 470,
@@ -318,31 +306,22 @@ function NormalLayout() {
           borderRadius: 20,
         }}
       />
-      {/* 새 경위서 작성 버튼 */}
+
       <button
         type="button"
         style={{
           width: 460,
           height: 50,
-          paddingLeft: 123,
-          paddingRight: 123,
-          paddingTop: 15,
-          paddingBottom: 15,
           left: 677,
           top: 683,
           position: 'absolute',
           background: '#096BC7',
-          overflow: 'hidden',
-          borderRadius: 6,
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 10,
-          display: 'inline-flex',
-          border: 'none',
-          cursor: 'pointer',
           color: 'white',
+          border: 'none',
+          borderRadius: 6,
           fontSize: 16,
           fontWeight: 600,
+          cursor: 'pointer',
         }}
       >
         새 경위서 작성
@@ -351,8 +330,10 @@ function NormalLayout() {
   );
 }
 
-/** ---------- 레이아웃: 알림 모드 (도움 요청 존재) ---------- */
+/** ---------- 알림 모드 ---------- */
 function AlertLayout() {
+  const navigate = useNavigate();
+
   return (
     <div
       style={{
@@ -366,7 +347,7 @@ function AlertLayout() {
           'Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", Arial, sans-serif',
       }}
     >
-      {/* 상단 구분선 */}
+
       <div
         style={{
           width: 1280,
@@ -378,7 +359,6 @@ function AlertLayout() {
         }}
       />
 
-      {/* 상단 로고 / 메뉴 */}
       <div
         style={{
           width: 369,
@@ -391,12 +371,11 @@ function AlertLayout() {
           fontSize: 50,
           fontWeight: 300,
           lineHeight: '22px',
-          wordWrap: 'break-word',
-          textShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
         }}
       >
         SMARTSHIELD
       </div>
+
       <div
         style={{
           width: 770,
@@ -408,14 +387,13 @@ function AlertLayout() {
           fontSize: 20,
           fontWeight: 300,
           lineHeight: '22px',
-          wordWrap: 'break-word',
           textAlign: 'right',
         }}
       >
         정보 수정
       </div>
 
-      {/* 우측 상단: 영상 내역 카드 */}
+      {/* 영상 내역 패널 */}
       <div
         style={{
           width: 550,
@@ -427,7 +405,7 @@ function AlertLayout() {
           borderRadius: 20,
         }}
       />
-      {/* 제목 */}
+
       <div
         style={{
           width: 177,
@@ -439,13 +417,11 @@ function AlertLayout() {
           color: 'black',
           fontSize: 40,
           fontWeight: 500,
-          lineHeight: '22px',
-          wordWrap: 'break-word',
         }}
       >
         영상 내역
       </div>
-      {/* 설명 */}
+
       <div
         style={{
           width: 371,
@@ -457,14 +433,13 @@ function AlertLayout() {
           fontSize: 20,
           fontWeight: 300,
           lineHeight: '22px',
-          wordWrap: 'break-word',
         }}
       >
         현장의 전체 영상 및
         <br />
         위험 상황 영상을 확인할 수 있습니다.
       </div>
-      {/* 흰 카드 2개 */}
+
       <div
         style={{
           width: 470,
@@ -476,6 +451,7 @@ function AlertLayout() {
           borderRadius: 20,
         }}
       />
+
       <div
         style={{
           width: 470,
@@ -487,37 +463,28 @@ function AlertLayout() {
           borderRadius: 20,
         }}
       />
-      {/* 전체 영상 확인하기 버튼 */}
+
       <button
         type="button"
         style={{
           width: 460,
           height: 50,
-          paddingLeft: 123,
-          paddingRight: 123,
-          paddingTop: 15,
-          paddingBottom: 15,
           left: 677,
           top: 416,
           position: 'absolute',
           background: '#096BC7',
-          overflow: 'hidden',
-          borderRadius: 6,
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 10,
-          display: 'inline-flex',
-          border: 'none',
-          cursor: 'pointer',
           color: 'white',
+          border: 'none',
+          borderRadius: 6,
           fontSize: 16,
           fontWeight: 600,
+          cursor: 'pointer',
         }}
       >
         전체 영상 확인하기
       </button>
 
-      {/* 우측 하단: 경위서 작성 카드 */}
+      {/* 경위서 작성 */}
       <div
         style={{
           width: 550,
@@ -529,7 +496,7 @@ function AlertLayout() {
           borderRadius: 20,
         }}
       />
-      {/* 제목 */}
+
       <div
         style={{
           width: 195,
@@ -541,13 +508,11 @@ function AlertLayout() {
           color: 'black',
           fontSize: 40,
           fontWeight: 500,
-          lineHeight: '22px',
-          wordWrap: 'break-word',
         }}
       >
         경위서 작성
       </div>
-      {/* 설명 */}
+
       <div
         style={{
           width: 287,
@@ -559,14 +524,13 @@ function AlertLayout() {
           fontSize: 20,
           fontWeight: 300,
           lineHeight: '22px',
-          wordWrap: 'break-word',
         }}
       >
         AI가 영상을 확인하고 요약하여
         <br />
         상황에 맞는 경위서를 작성해줍니다.
       </div>
-      {/* 흰 카드 */}
+
       <div
         style={{
           width: 470,
@@ -578,37 +542,28 @@ function AlertLayout() {
           borderRadius: 20,
         }}
       />
-      {/* 새 경위서 작성 버튼 */}
+
       <button
         type="button"
         style={{
           width: 460,
           height: 50,
-          paddingLeft: 123,
-          paddingRight: 123,
-          paddingTop: 15,
-          paddingBottom: 15,
           left: 677,
           top: 683,
           position: 'absolute',
           background: '#096BC7',
-          overflow: 'hidden',
-          borderRadius: 6,
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 10,
-          display: 'inline-flex',
-          border: 'none',
-          cursor: 'pointer',
           color: 'white',
+          border: 'none',
+          borderRadius: 6,
           fontSize: 16,
           fontWeight: 600,
+          cursor: 'pointer',
         }}
       >
         새 경위서 작성
       </button>
 
-      {/* 좌측: 빨간 카드 + 부엉이 + 텍스트 */}
+      {/* 좌측 빨간 패널 */}
       <div
         style={{
           width: 549.72,
@@ -618,8 +573,11 @@ function AlertLayout() {
           position: 'absolute',
           background: '#D46464',
           borderRadius: 20,
+          cursor: 'pointer',
         }}
+        onClick={() => navigate('/detail')}
       />
+
       <img
         style={{
           width: 228.24,
@@ -631,6 +589,7 @@ function AlertLayout() {
         src="image_file/emergency_bird.png"
         alt="위급 상황 캐릭터"
       />
+
       <div
         style={{
           width: 443.77,
@@ -642,29 +601,15 @@ function AlertLayout() {
           color: 'white',
           fontSize: 40,
           fontWeight: 500,
-          lineHeight: '22px',
-          wordWrap: 'break-word',
         }}
       >
         도움 요청을 확인해주세요
       </div>
-      {/* 왼쪽 바탕에 깔린 옅은 보라 패널 (원본대로 유지) */}
-      <div
-        style={{
-          width: 400,
-          height: 607,
-          left: -708,
-          top: 70,
-          position: 'absolute',
-          background: 'rgba(78.13, 95.49, 208.34, 0.30)',
-          borderRadius: 20,
-        }}
-      />
     </div>
   );
 }
 
-/** ---------- 대시보드 (알림 여부에 따라 분기) ---------- */
+/** ---------- 대시보드 ---------- */
 function Dashboard() {
   const isAlert = useAlertState();
   return isAlert ? <AlertLayout /> : <NormalLayout />;
@@ -679,6 +624,7 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/main-page" element={<Dashboard />} />
+        <Route path="/detail" element={<Detail />} />  {/*detail 페이지 정상 등록 */}
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </BrowserRouter>

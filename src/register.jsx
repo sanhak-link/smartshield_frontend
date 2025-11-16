@@ -84,6 +84,16 @@ export default function Register() {
 
   return (
     <div
+  style={{
+    width: 1280,
+    height: 800,
+    margin: "0 auto",
+    position: "relative",
+    overflow: "hidden",
+    background: "white",
+  }}
+  >
+    <div
       style={{
         width: 1280,
         height: 800,
@@ -263,8 +273,10 @@ export default function Register() {
       {/* 실제 폼 (submit용) — 화면엔 보이지 않음 */}
       <form id="register-form" onSubmit={onSubmit} style={{ display: "none" }} />
     </div>
+    </div>
   );
 }
+
 
 /* ───────────────── helper UI components ───────────────── */
 
