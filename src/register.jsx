@@ -24,63 +24,45 @@ export default function Register() {
     setForm((p) => ({ ...p, [name]: value }));
   };
 
-  // 인증코드 보내기 (api.js sendEmailCode 사용)
+  // 인증코드 보내기
   const handleSendEmailCode = async () => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       setMsg("올바른 이메일을 입력하세요.");
       return;
     }
-
     setEmailSendLoading(true);
     setMsg("");
-
     const res = await sendEmailCode(form.email);
-
-    if (!res.ok) {
-      setMsg(res.error || "인증 코드 발송 실패");
-    } else {
-      setMsg("인증 코드가 발송되었습니다.");
-    }
     setEmailSendLoading(false);
+    setMsg(res.ok ? "인증 코드가 발송되었습니다." : (res.error || "인증 코드 발송 실패"));
   };
 
-  // 인증코드 확인 (api.js verifyEmailCode 사용)
+  // 인증코드 확인
   const handleVerifyEmailCode = async () => {
     if (!form.emailCode.trim()) {
       setMsg("인증 코드를 입력하세요.");
       return;
     }
-
     setEmailVerifyLoading(true);
     setMsg("");
-
-    const res = await verifyEmailCode({
-      email: form.email,
-      code: form.emailCode,
-    });
-
-    if (!res.ok) {
-      setMsg(res.error || "인증 실패");
-    } else {
+    const res = await verifyEmailCode({ email: form.email, code: form.emailCode });
+    setEmailVerifyLoading(false);
+    if (!res.ok) setMsg(res.error || "인증 실패");
+    else {
       setForm((p) => ({ ...p, isEmailVerified: true }));
       setMsg("✔ 이메일 인증이 완료되었습니다.");
     }
-    setEmailVerifyLoading(false);
   };
 
   const onSubmit = async (e) => {
     e.preventDefault();
-
     if (!form.name.trim()) return setMsg("이름을 입력하세요.");
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-      return setMsg("이메일 형식이 올바르지 않습니다.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return setMsg("이메일 형식이 올바르지 않습니다.");
     if (!form.isEmailVerified) return setMsg("이메일 인증을 완료해주세요.");
-    if (form.password.length < 6)
-      return setMsg("비밀번호는 6자 이상이어야 합니다.");
+    if (form.password.length < 6) return setMsg("비밀번호는 6자 이상이어야 합니다.");
 
     setLoading(true);
     setMsg("");
-
     try {
       const res = await signup({
         email: form.email,
@@ -88,12 +70,8 @@ export default function Register() {
         name: form.name,
         phoneNumber: form.phoneNumber,
       });
-
-      if (!res.ok) {
-        setMsg(res.error || "회원가입에 실패했습니다.");
-      } else {
-        navigate("/main-page");
-      }
+      if (!res.ok) setMsg(res.error || "회원가입에 실패했습니다.");
+      else navigate("/main-page");
     } catch {
       setMsg("네트워크 오류");
     } finally {
@@ -109,267 +87,159 @@ export default function Register() {
         position: "relative",
         background: "white",
         overflow: "hidden",
+        fontFamily:
+          'Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", Arial, sans-serif',
       }}
     >
-      {/* 연보라 패널 */}
+      {/* 연보라 패널 (배경) */}
       <div
         style={{
-          width: 400,
-          height: 730,
-          left: 451,
-          top: 24,
+          width: 545,
+          height: 680,
+          left: 381,
+          top: 66,
           position: "absolute",
           background: "rgba(78.13, 95.49, 208.34, 0.30)",
           borderRadius: 20,
         }}
       />
 
-      {/* 타이틀 */}
+      {/* 큰 타이틀 */}
       <div
         style={{
-          width: 211,
-          height: 44,
-          left: 598,
-          top: 41,
+          width: 535,
+          left: 414,
+          top: 125,
           position: "absolute",
           color: "black",
-          fontSize: 27,
-          fontFamily: "Pretendard",
-          fontWeight: "700",
+          fontSize: 30,
+          fontWeight: 700,
           wordWrap: "break-word",
         }}
       >
-        회원가입
+        시스템 사용을 위해 정보를 입력해주세요.
       </div>
 
-      {/* 폼 전체 */}
-      <form
-        id="register-form"
-        onSubmit={onSubmit}
-        style={{
-          width: 329,
-          height: 438,
-          left: 486,
-          top: 150,
-          position: "absolute",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 16,
-          display: "inline-flex",
-          fontFamily: "Pretendard",
-        }}
-      >
-        {/* 이름 */}
-        <Field label="이름">
-          <Input name="name" value={form.name} onChange={onChange} />
-        </Field>
+      {/* 이름 라벨 + 인풋 */}
+      <Label x={420} y={176} text="이름" />
+      <InputBox x={420} y={203} w={469}>
+        <input
+          name="name"
+          value={form.name}
+          onChange={onChange}
+          placeholder="이름을 입력해주세요"
+          style={inputStyle}
+        />
+      </InputBox>
 
-        {/* 전화번호 */}
-        <Field label="전화번호">
-          <Input
-            name="phoneNumber"
-            value={form.phoneNumber}
-            onChange={onChange}
-          />
-        </Field>
+      {/* 전화번호 */}
+      <Label x={420} y={265} text="전화번호" />
+      <InputBox x={421} y={289} w={468}>
+        <input
+          name="phoneNumber"
+          value={form.phoneNumber}
+          onChange={onChange}
+          placeholder="전화번호를 입력해주세요"
+          style={inputStyle}
+        />
+      </InputBox>
 
-        {/* 이메일 */}
-        <Field label="이메일">
-          <Input
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={onChange}
-          />
-        </Field>
+      {/* 이메일 + 인증코드 보내기 버튼 (가로 분할) */}
+      <Label x={420} y={354} text="이메일" />
+      <InputBox x={421} y={376} w={320}>
+        <input
+          name="email"
+          type="email"
+          value={form.email}
+          onChange={onChange}
+          placeholder="이메일을 입력해주세요"
+          style={inputStyle}
+        />
+      </InputBox>
+      <ActionBtn
+        x={748}
+        y={376}
+        w={141}
+        text={emailSendLoading ? "발송 중..." : "인증 코드 보내기"}
+        onClick={emailSendLoading ? undefined : handleSendEmailCode}
+        bg="#7658E4"
+      />
 
-        {/* 인증 코드 보내기 버튼 */}
-        <button
-          type="button"
-          onClick={emailSendLoading ? undefined : handleSendEmailCode}
-          style={{
-            width: 320,
-            height: 30,
-            paddingLeft: 16,
-            paddingRight: 16,
-            paddingTop: 15,
-            paddingBottom: 15,
-            background: "#7658E4",
-            overflow: "hidden",
-            borderRadius: 6,
-            justifyContent: "flex-start",
-            alignItems: "center",
-            gap: 10,
-            display: "inline-flex",
-            border: "none",
-            cursor: "pointer",
-            fontFamily: "Pretendard",
-          }}
-        >
-          <div
-            style={{
-              textAlign: "right",
-              color: "white",
-              fontSize: 16,
-              fontFamily: "Pretendard",
-              fontWeight: "600",
-              wordWrap: "break-word",
-            }}
-          >
-            {emailSendLoading
-              ? "발송 중..."
-              : "                        인증 코드 보내기"}
-          </div>
-        </button>
+      {/* 인증 코드 + 인증 확인 버튼 */}
+      <Label x={420} y={452} text="인증 코드" />
+      <InputBox x={421} y={474} w={320}>
+        <input
+          name="emailCode"
+          value={form.emailCode}
+          onChange={onChange}
+          placeholder="메일로 받은 코드를 입력해주세요"
+          style={inputStyle}
+        />
+      </InputBox>
+      <ActionBtn
+        x={748}
+        y={474}
+        w={141}
+        text={emailVerifyLoading ? "확인 중..." : "인증 확인"}
+        onClick={emailVerifyLoading ? undefined : handleVerifyEmailCode}
+        bg="#7658E4"
+      />
 
-        {/* 인증 코드 */}
+      {/* 비밀번호 */}
+      <Label x={421} y={548} text="비밀번호" />
+      <InputBox x={420} y={572} w={469}>
+        <input
+          name="password"
+          type="password"
+          value={form.password}
+          onChange={onChange}
+          placeholder="••••••••"
+          style={inputStyle}
+        />
+      </InputBox>
+
+      {/* 메시지 영역 (인풋 아래 적당히) */}
+      {msg && (
         <div
-          data-property-1="Email_Box"
           style={{
-            flexDirection: "column",
-            justifyContent: "flex-start",
-            alignItems: "flex-start",
-            gap: 8,
-            display: "flex",
+            position: "absolute",
+            left: 420,
+            top: 630,
+            width: 469,
+            color: form.isEmailVerified ? "#1C9A36" : "#c00",
+            fontSize: 14,
+            fontWeight: 600,
           }}
         >
-          <div
-            style={{
-              color: "rgba(0, 0, 0, 0.85)",
-              fontSize: 16,
-              fontFamily: "Pretendard",
-              fontWeight: "600",
-              wordWrap: "break-word",
-            }}
-          >
-            인증 코드
-          </div>
-          <div
-            style={{
-              width: 320,
-              height: 50,
-              paddingLeft: 16,
-              paddingRight: 16,
-              paddingTop: 15,
-              paddingBottom: 15,
-              background: "#F5F5F5",
-              overflow: "hidden",
-              borderRadius: 6,
-              justifyContent: "flex-start",
-              alignItems: "center",
-              gap: 10,
-              display: "inline-flex",
-            }}
-          >
-            <input
-              name="emailCode"
-              value={form.emailCode}
-              onChange={onChange}
-              placeholder="메일로 받은 코드를 입력해주세요"
-              style={{
-                width: "100%",
-                height: "100%",
-                border: "none",
-                outline: "none",
-                background: "transparent",
-                fontSize: 16,
-                fontFamily: "Pretendard",
-                fontWeight: "500",
-                color: "#111",
-              }}
-            />
-          </div>
+          {msg}
         </div>
+      )}
 
-        {/* 인증 확인 버튼 */}
-        <button
-          type="button"
-          onClick={emailVerifyLoading ? undefined : handleVerifyEmailCode}
-          style={{
-            width: 320,
-            height: 30,
-            paddingLeft: 16,
-            paddingRight: 16,
-            paddingTop: 15,
-            paddingBottom: 15,
-            background: "#7658E4",
-            overflow: "hidden",
-            borderRadius: 6,
-            justifyContent: "flex-start",
-            alignItems: "center",
-            gap: 10,
-            display: "inline-flex",
-            border: "none",
-            cursor: "pointer",
-            fontFamily: "Pretendard",
-          }}
-        >
-          <div
-            style={{
-              textAlign: "right",
-              color: "white",
-              fontSize: 16,
-              fontFamily: "Pretendard",
-              fontWeight: "600",
-              wordWrap: "break-word",
-            }}
-          >
-            {emailVerifyLoading
-              ? "확인 중..."
-              : "                              인증 확인"}
-          </div>
-        </button>
-
-        {/* 비밀번호 */}
-        <Field label=" 비밀번호">
-          <Input
-            name="password"
-            type="password"
-            value={form.password}
-            onChange={onChange}
-            placeholder="••••••••"
-          />
-        </Field>
-
-        {/* 메시지 */}
-        {msg && (
-          <div
-            style={{
-              width: 320,
-              color: form.isEmailVerified ? "#1C9A36" : "#c00",
-              fontSize: 14,
-              fontFamily: "Pretendard",
-            }}
-          >
-            {msg}
-          </div>
-        )}
-      </form>
-
-      {/* 가입하기 버튼 */}
-      <div
+      {/* 가입하기 버튼 (클릭 → 폼 submit) */}
+      <button
+        type="button"
         onClick={() => {
-          const f = document.getElementById("register-form");
-          if (f) f.requestSubmit();
+          if (!loading) {
+            const f = document.getElementById("register-form");
+            if (f?.requestSubmit) f.requestSubmit();
+            else f?.submit();
+          }
         }}
+        disabled={loading}
         style={{
-          width: 320,
-          height: 40,
-          paddingLeft: 16,
-          paddingRight: 16,
-          paddingTop: 15,
-          paddingBottom: 15,
-          left: 491,
-          top: 663,
+          width: 468,
+          height: 50,
+          left: 420,
+          top: 658,
           position: "absolute",
           background: "#096BC7",
           overflow: "hidden",
           borderRadius: 6,
-          justifyContent: "flex-start",
-          alignItems: "center",
-          gap: 10,
+          border: "none",
           display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 10,
           cursor: loading ? "not-allowed" : "pointer",
         }}
       >
@@ -378,83 +248,100 @@ export default function Register() {
             textAlign: "right",
             color: "white",
             fontSize: 16,
-            fontFamily: "Pretendard",
-            fontWeight: "600",
+            fontWeight: 600,
             wordWrap: "break-word",
+            letterSpacing: ".02em",
           }}
         >
-          {loading
-            ? "                               처리 중..."
-            : "                               가입하기"}
+          {loading ? "처리 중..." : "가입하기"}
         </div>
-        <div style={{ width: 100, height: 100, position: "relative" }} />
-      </div>
+      </button>
+
+      {/* 실제 폼 (submit용) — 화면엔 보이지 않음 */}
+      <form id="register-form" onSubmit={onSubmit} style={{ display: "none" }} />
     </div>
   );
 }
 
-/* 이름/전화번호/이메일/비밀번호용 필드 */
-function Field({ label, children }) {
+/* ───────────────── helper UI components ───────────────── */
+
+function Label({ x, y, text }) {
   return (
     <div
-      data-property-1="Email_Box"
       style={{
-        flexDirection: "column",
-        justifyContent: "flex-start",
-        alignItems: "flex-start",
-        gap: 8,
-        display: "flex",
+        left: x,
+        top: y,
+        position: "absolute",
+        color: "rgba(0, 0, 0, 0.85)",
+        fontSize: 16,
+        fontWeight: 600,
+        wordWrap: "break-word",
       }}
     >
-      <div
-        style={{
-          color: "rgba(0, 0, 0, 0.85)",
-          fontSize: 16,
-          fontFamily: "Pretendard",
-          fontWeight: "600",
-          wordWrap: "break-word",
-        }}
-      >
-        {label}
-      </div>
+      {text}
+    </div>
+  );
+}
+
+function InputBox({ x, y, w, children }) {
+  return (
+    <div
+      style={{
+        width: w,
+        height: 50,
+        left: x,
+        top: y,
+        position: "absolute",
+        background: "white",
+        borderRadius: 6,
+        display: "flex",
+        alignItems: "center",
+        padding: "0 16px",
+        boxSizing: "border-box",
+      }}
+    >
       {children}
     </div>
   );
 }
 
-function Input({ placeholder, ...rest }) {
+function ActionBtn({ x, y, w, text, onClick, bg = "#7658E4" }) {
   return (
-    <div
+    <button
+      type="button"
+      onClick={onClick}
       style={{
-        width: 320,
+        width: w,
         height: 50,
-        paddingLeft: 16,
-        paddingRight: 16,
-        paddingTop: 15,
-        paddingBottom: 15,
-        background: "#F5F5F5",
+        left: x,
+        top: y,
+        position: "absolute",
+        background: bg,
+        overflow: "hidden",
         borderRadius: 6,
-        justifyContent: "flex-start",
-        alignItems: "center",
-        gap: 10,
         display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 10,
+        border: "none",
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: 600,
+        cursor: "pointer",
       }}
     >
-      <input
-        {...rest}
-        placeholder={placeholder}
-        style={{
-          width: "100%",
-          height: "100%",
-          border: "none",
-          outline: "none",
-          background: "transparent",
-          fontSize: 16,
-          fontFamily: "Pretendard",
-          fontWeight: "500",
-          color: "#111",
-        }}
-      />
-    </div>
+      {text}
+    </button>
   );
 }
+
+const inputStyle = {
+  width: "100%",
+  height: "100%",
+  border: "none",
+  outline: "none",
+  background: "transparent",
+  fontSize: 16,
+  fontWeight: 500,
+  color: "#111",
+};
