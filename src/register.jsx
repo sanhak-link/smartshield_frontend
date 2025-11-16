@@ -71,7 +71,10 @@ export default function Register() {
         phoneNumber: form.phoneNumber,
       });
       if (!res.ok) setMsg(res.error || "회원가입에 실패했습니다.");
-      else navigate("/main-page");
+     else {
+      localStorage.removeItem('accessToken'); // 혹시 가입 응답에 토큰이 왔을 때 대비
+      navigate("/home"); // ✅ 가입 후 로그인 화면으로 이동
+    }
     } catch {
       setMsg("네트워크 오류");
     } finally {
