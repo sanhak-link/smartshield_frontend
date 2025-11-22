@@ -181,6 +181,21 @@ export async function signup({
 // ── API: 이메일 인증 코드 발송 ────────────────────────────────
 // 프론트: sendEmailCode(email)
 export async function sendEmailCode(email) {
+  // [추가됨] 허용 도메인 목록 정의
+  const ALLOWED_DOMAINS = ["chungbuk.ac.kr", "cbnu.ac.kr"];
+  
+  // [추가됨] 이메일에서 도메인 추출 및 검사
+  // 예: "user@cbnu.ac.kr" -> "cbnu.ac.kr"
+  const domain = email.split('@')[1];
+
+  // 도메인이 없거나(잘못된 형식), 허용 목록에 없으면 바로 에러 리턴
+  if (!domain || !ALLOWED_DOMAINS.includes(domain)) {
+    return { 
+      ok: false, 
+      error: "허용된 학교 도메인(chungbuk.ac.kr, cbnu.ac.kr)이 아닙니다." 
+    };
+  }
+
   const body = JSON.stringify({ email });
   const url = buildUrl("/api/auth/email/send");
   let lastErr = "인증 코드 발송 실패";
