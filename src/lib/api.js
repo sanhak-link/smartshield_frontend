@@ -281,3 +281,40 @@ export async function apiAuthFetch(path, options = {}) {
 
   return { status: res.status, ok: res.ok, data, used: url };
 }
+export async function getVideoUrl(filename) {
+  // S3 키(filename)를 쿼리 파라미터로 백엔드에 전송합니다.
+  const path = `/api/video/url?filename=${encodeURIComponent(filename)}`;
+  const url = buildUrl(path);
+  let lastErr = "비디오 URL 요청 실패";
+
+  try {
+    // GET 요청은 인증 없이 바로 요청한다고 가정합니다.
+    // 만약 영상 URL 요청도 인증(토큰)이 필요하다면 apiAuthFetch를 사용해야 합니다.
+    const res = await fetchWithTimeout(
+      url,
+      {
+        method: "GET",
+        // headers: { "Content-Type": "application/json" }, // GET 요청이라 필요 없음
+      },
+      10000
+    );
+
+    const data = await safeJson(res);
+    
+    // 백엔드가 { url: "http://s3-presigned-url..." } 형태로 응답한다고 가정합니다.
+    if (res.ok && data && data.url) {
+      // 성공적으로 S3 Pre-signed URL을 받은 경우
+      return { ok: true, url: data.url, used: url };
+    } else {
+      // API 호출은 성공했으나 응답 데이터에 오류가 있거나 URL이 없는 경우
+      lastErr = 
+        (data && (data.message || data.error)) || 
+        `유효한 URL을 받지 못함 (HTTP ${res.status}) at ${url}`;
+      return { ok: false, error: lastErr, data, used: url };
+    }
+  } catch (e) {
+    // 네트워크 오류 등 예외 발생 시
+    lastErr = e?.message || "네트워크 오류";
+    return { ok: false, error: lastErr, used: url };
+  }
+}
