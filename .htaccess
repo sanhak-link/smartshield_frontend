@@ -1,0 +1,21 @@
+# --- MIME ---
+<IfModule mod_mime.c>
+  AddType application/javascript .js
+  AddType application/javascript .mjs
+</IfModule>
+
+# --- Rewrite ---
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # 1) API 프록시: /api/* → EC2 백엔드
+  RewriteRule ^api/(.*)$ http://3.26.33.204:8080/api/$1 [P]
+
+  # 2) 정적 파일이 존재하면 그대로 제공
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # 3) React Router 대응 (index.html 우선 제공)
+  RewriteRule ^ index.html [L]
+</IfModule>

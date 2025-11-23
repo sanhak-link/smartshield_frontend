@@ -330,9 +330,31 @@ function NormalLayout() {
   );
 }
 
-/** ---------- 알림 모드 ---------- */
+/** ---------- 알림 모드 (수정) ---------- */
+/*
+기존 코드 : 알림 클릭하고 상세 페이지 이동 후 다시 뒤로 가도
+빨간 색 알림이 남아 있음
+*/
+
 function AlertLayout() {
   const navigate = useNavigate();
+
+  // 알림(빨간 영역) 클릭 시 백엔드에 알림 해제 요청을 보내는 함수
+  const handleCheckAlert = async () => {
+    try {
+      // 1. AlertService의 active 상태를 false로 변경
+      await fetch('/api/alerts/resolve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      console.log("알림 해제 신호 전송 완료");
+    } catch (error) {
+      console.error("알림 해제 요청 중 에러:", error);
+    } finally {
+      // 2. 성공 여부와 상관없이 상세 페이지로 이동
+      navigate('/detail');
+    }
+  };
 
   return (
     <div
@@ -347,7 +369,6 @@ function AlertLayout() {
           'Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", Arial, sans-serif',
       }}
     >
-
       <div
         style={{
           width: 1280,
@@ -484,7 +505,7 @@ function AlertLayout() {
         전체 영상 확인하기
       </button>
 
-      {/* 경위서 작성 */}
+      {/* 경위서 작성 패널 */}
       <div
         style={{
           width: 550,
@@ -563,7 +584,7 @@ function AlertLayout() {
         새 경위서 작성
       </button>
 
-      {/* 좌측 빨간 패널 */}
+      {/* 좌측 빨간 패널 (여기가 핵심 변경 사항입니다) */}
       <div
         style={{
           width: 549.72,
@@ -575,7 +596,7 @@ function AlertLayout() {
           borderRadius: 20,
           cursor: 'pointer',
         }}
-        onClick={() => navigate('/detail')}
+        onClick={handleCheckAlert} // 단순 navigate가 아닌 핸들러 함수 호출
       />
 
       <img
@@ -585,6 +606,7 @@ function AlertLayout() {
           left: 413.76,
           top: 389.04,
           position: 'absolute',
+          pointerEvents: 'none', // 이미지 클릭 시에도 부모 div의 이벤트가 발생하도록 설정 (선택사항)
         }}
         src="image_file/emergency_bird.png"
         alt="위급 상황 캐릭터"
@@ -601,6 +623,7 @@ function AlertLayout() {
           color: 'white',
           fontSize: 40,
           fontWeight: 500,
+          pointerEvents: 'none', // 텍스트 클릭 시에도 부모 div의 이벤트가 발생하도록 설정
         }}
       >
         도움 요청을 확인해주세요
