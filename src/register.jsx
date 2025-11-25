@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {  Navigate,useNavigate } from "react-router-dom";
 import { signup, sendEmailCode, verifyEmailCode } from "./lib/api.js";
 
 // 선택 가능한 이메일 도메인 목록 
@@ -129,9 +129,14 @@ export default function Register() {
 
   return (
     <div style={{ width: 1280, height: 800, margin: "0 auto", position: 'relative', background: 'white', overflow: 'hidden' }}>
-        {/* 배경 패널 */}
+
+      {/* 배경 패널 */}
       <div style={{ width: 545, height: 680, left: 382, top: 67, position: 'absolute', background: 'rgba(78.13, 95.49, 208.34, 0.30)', borderRadius: 20 }} />
       
+      {/* ===== 상단 아이콘 ===== */}
+       <img style={{ width: 100, height: 100, left: 1170, top: 16, position: 'absolute' }} src="image_file\home_icon.png" onClick={() => navigate('/home')}  />
+
+
       {/* 메인 타이틀 */}
       <div style={{ width: 535, left: 414, top: 125, position: 'absolute', color: 'black', fontSize: 30, fontFamily: 'Pretendard', fontWeight: '700', wordWrap: 'break-word' }}>시스템 사용을 위해 정보를 입력해주세요.</div>
 
