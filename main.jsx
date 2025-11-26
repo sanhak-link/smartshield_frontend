@@ -190,17 +190,33 @@ function NormalLayout() {
 }
 
 
+
+/** ---------- 알림 모드 (수정) ---------- */
+/*
+기존 코드 : 알림 클릭하고 상세 페이지 이동 후 다시 뒤로 가도
+빨간 색 알림이 남아 있음
+*/
+
 // alert 상태
 function AlertLayout() {
   const navigate = useNavigate();
 
-  const handleAlertClick = async () => {
+// 알림(빨간 영역) 클릭 시 백엔드에 알림 해제 요청을 보내는 함수
+  const handleAlertClick  = async () => {
     try {
-      await fetch('/api/alerts/resolve', { method: 'POST' });
-    } catch (_) {}
-    navigate('/detail');
+      // 1. AlertService의 active 상태를 false로 변경
+      await fetch('/api/alerts/resolve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      console.log("알림 해제 신호 전송 완료");
+    } catch (error) {
+      console.error("알림 해제 요청 중 에러:", error);
+    } finally {
+      // 2. 성공 여부와 상관없이 상세 페이지로 이동
+      navigate('/detail');
+    }
   };
-
   return (
     <div style={{ width: 1280, height: 800, position: 'relative', background: 'white', overflow: 'hidden' }}>
 
@@ -295,12 +311,12 @@ function AlertLayout() {
 
       {/* ===== 좌측 빨간 패널 ===== */}
       <div
-        onClick={handleAlertClick}
         style={{
           width: 575, height: 624, left: 40, top: 138,
           position: 'absolute', background: '#D46464', borderRadius: 20,
           cursor: 'pointer'
         }}
+        onClick={handleAlertClick}
       />
 
       <img
