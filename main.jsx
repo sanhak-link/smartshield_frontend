@@ -8,6 +8,7 @@ import VideoInfo from './src/video_info.jsx';
 import WarningInfo from './src/warning_info.jsx';
 import WriteInfo from './src/write_down.jsx';
 import './app.css';
+import TutorialPopup from './src/TutorialPopup.jsx';
 
 
 
@@ -53,7 +54,15 @@ function useAlertState() {
 // 기본 상태 
 function NormalLayout() {
   const navigate = useNavigate();
+  // 튜토리얼 팝업 창 함수
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  const handleOpenTutorial = () => setShowTutorial(true);
+  const handleCloseTutorial = () => setShowTutorial(false);
+  // 
+
   return (
+    <>
     <div style={{ width: 1280, height: 800, position: 'relative', background: 'white', overflow: 'hidden' }}>
 
       {/* ===== 오른쪽 패널 1: 위험 탐지 내역 ===== */}
@@ -145,7 +154,7 @@ function NormalLayout() {
       />
 
       {/* ===== 상단 아이콘 ===== */}
-       <img style={{ width: 69, height: 69, left: 1104, top: 26, position: 'absolute' }} src="image_file/guide_icon.png" />
+       <img style={{ width: 69, height: 69, left: 1104, top: 26, position: 'absolute' }} src="image_file/guide_icon.png" onClick={handleOpenTutorial}/>
        <img style={{ width: 100, height: 100, left: 1170, top: 16, position: 'absolute' }} src="image_file/home_icon.png" onClick={() => navigate('/main-page')}  />
 
 
@@ -186,6 +195,8 @@ function NormalLayout() {
         src="image_file/normal_bird.png"
       />
     </div>
+    {showTutorial && <TutorialPopup onClose={handleCloseTutorial} />}
+    </>
   );
 }
 
@@ -200,6 +211,12 @@ function NormalLayout() {
 // alert 상태
 function AlertLayout() {
   const navigate = useNavigate();
+// 추가 시작 (튜토리얼 상태 관리)
+  const [showTutorial, setShowTutorial] = useState(false); 
+
+  const handleOpenTutorial = () => setShowTutorial(true);
+  const handleCloseTutorial = () => setShowTutorial(false);
+//  추가 끝
 
 // 알림(빨간 영역) 클릭 시 백엔드에 알림 해제 요청을 보내는 함수
   const handleAlertClick  = async () => {
@@ -218,6 +235,7 @@ function AlertLayout() {
     }
   };
   return (
+    <>
     <div style={{ width: 1280, height: 800, position: 'relative', background: 'white', overflow: 'hidden' }}>
 
       {/* ===== 오른쪽 패널 1 ===== */}
@@ -305,7 +323,7 @@ function AlertLayout() {
       />
 
       {/* ===== 상단 아이콘 ===== */}
-      <img style={{ width: 69, height: 69, left: 1104, top: 26, position: 'absolute' }} src="image_file/guide_icon.png" />
+      <img style={{ width: 69, height: 69, left: 1104, top: 26, position: 'absolute' }} src="image_file/guide_icon.png" onClick={handleOpenTutorial} />
       <img style={{ width: 100, height: 100, left: 1170, top: 16, position: 'absolute' }} src="image_file/home_icon.png"/>
 
 
@@ -349,8 +367,9 @@ function AlertLayout() {
         확인해주세요
         <br />
       </div>
-
     </div>
+    {showTutorial && <TutorialPopup onClose={handleCloseTutorial} />}
+    </>
   );
 }
 
