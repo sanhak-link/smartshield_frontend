@@ -1,19 +1,9 @@
 // detail.jsx
 import React from "react";
-import { useParams } from 'react-router-dom'; 
-// 2. 컴포넌트에 생성한 VideoPlayer 컴포넌트를 import
-import VideoPlayer from './components/videoplayer.jsx'; 
 
 export default function Detail() {
-  // 3. URL에서 filename 파라미터를 추출합니다. (예: /detail/demo_video/sample.mp4)
-  const { filename } = useParams();
-  
-  // URL 파라미터가 없는 경우를 대비하여 임시 파일명을 설정합니다.
-  // 실제 서비스 시에는 filename이 없을 경우 에러 처리나 빈 화면을 보여줘야 합니다.
-  const videoKey = filename || "placeholder/default_video.mp4"; 
-
   return (
-    //  화면 가운데 1280×800 고정
+    // 화면 가운데 1280×800 고정
     <div
       style={{
         width: 1280,
@@ -26,7 +16,6 @@ export default function Detail() {
           'Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", Arial, sans-serif',
       }}
     >
-      {/*layout*/}
       <div
         style={{
           width: 1280,
@@ -36,30 +25,75 @@ export default function Detail() {
           overflow: "hidden",
         }}
       >
-        {/*
-          [변경 사항]: 기존 400x400 Placeholder (D9D9D9 회색 박스)와 텍스트를 삭제하고,
-          그 자리에 VideoPlayer 컴포넌트를 위치시키는 div를 삽입했습니다.
-        */}
+        {/* 🔴 왼쪽 큰 카드: 위험 요소 판단 결과 + 실시간 카메라 화면 */}
         <div
           style={{
-            width: 400,
-            height: 400,
-            left: 141, 
-            top: 233,
+            width: 550,
+            height: 550,
+            left: 64,
+            top: 158,
             position: "absolute",
+            background: "#D46464",
             borderRadius: 20,
-            overflow: 'hidden', // VideoPlayer가 이 영역을 벗어나지 않도록 설정
+            overflow: "hidden",
           }}
         >
-          {videoKey && <VideoPlayer filename={videoKey} />}
-          {!videoKey && (
-            <div style={{ padding: 20, textAlign: 'center', color: 'red' }}>
-                영상 파일 이름(filename)이 URL에서 누락되었습니다.
-            </div>
-          )}
+          {/* 상단 타이틀 */}
+          <div
+            style={{
+              position: "absolute",
+              top: 20,
+              left: 0,
+              width: "100%",
+              textAlign: "center",
+              color: "white",
+              fontSize: 35,
+              fontWeight: 500,
+              lineHeight: "22px",
+              wordWrap: "break-word",
+            }}
+          >
+            위험 요소 판단 결과
+          </div>
+
+          {/* 가운데 실시간 카메라 영상 */}
+          <img
+            src="http://localhost:5001/live"
+            alt="실시간 현장 영상"
+            style={{
+              position: "absolute",
+              top: 80,
+              left: 20,
+              right: 20,
+              bottom: 80,
+              width: "calc(100% - 40px)",
+              height: "calc(100% - 160px)",
+              objectFit: "cover",
+              borderRadius: 12,
+              backgroundColor: "black", // 스트림 안 뜰 때 배경
+            }}
+          />
+
+          {/* 하단 객체명 표시 (임시 텍스트) */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: 20,
+              left: 0,
+              width: "100%",
+              textAlign: "center",
+              color: "white",
+              fontSize: 40,
+              fontWeight: 500,
+              lineHeight: "22px",
+              wordWrap: "break-word",
+            }}
+          >
+            {"< 객체명 >"}
+          </div>
         </div>
-        
-        {/* 기존 코드 유지 */}
+
+        {/* 나머지 기존 레이아웃 유지 */}
         <div
           style={{
             width: 550,
@@ -173,53 +207,6 @@ export default function Detail() {
             borderRadius: 20,
           }}
         />
-        <div
-          style={{
-            width: 550,
-            height: 550,
-            left: 64,
-            top: 158,
-            position: "absolute",
-            background: "#D46464",
-            borderRadius: 20,
-          }}
-        />
-        <div
-          style={{
-            width: 444,
-            height: 65,
-            left: 117,
-            top: 652,
-            position: "absolute",
-            textAlign: "center",
-            color: "white",
-            fontSize: 40,
-            fontWeight: 500,
-            lineHeight: "22px",
-            wordWrap: "break-word",
-          }}
-        >
-          {"< 객체명 >"}
-        </div>
-        <div
-          style={{
-            width: 444,
-            height: 65,
-            left: 117,
-            top: 192,
-            position: "absolute",
-            textAlign: "center",
-            color: "white",
-            fontSize: 35,
-            fontWeight: 500,
-            lineHeight: "22px",
-            wordWrap: "break-word",
-          }}
-        >
-          위험 요소 판단 결과
-        </div>
-        {}
-        {}
         <div
           style={{
             width: 1280,
