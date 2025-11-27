@@ -99,14 +99,23 @@ export default function WriteInfo() {
       {/* 제목 */}
       <div
         style={{
+          width: 1160,
+          height: 50,
           left: 60,
-          top: 145,
+          top: 130,
           position: "absolute",
-          fontSize: 28,
-          fontWeight: 600,
+          background: "#F2F2F2",
+          borderRadius: 20,
+          padding: 24,
+          fontSize: 30,
+          boxSizing: "border-box",
+          textAlign: "center",
+         //overflowY: "auto",
+         lineHeight: "4px"
+         
         }}
       >
-        자동 출동 경위서
+      자동 출동 경위서
       </div>
 
       {/* 정보/본문 박스 */}
