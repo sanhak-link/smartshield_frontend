@@ -53,7 +53,7 @@ export default function Detail() {
               wordWrap: "break-word",
             }}
           >
-            위험 요소 판단 결과
+            실시간 현장 상황
           </div>
 
           {/* 가운데 실시간 카메라 영상 */}

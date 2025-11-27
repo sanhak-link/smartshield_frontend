@@ -1,197 +1,36 @@
-// src/video_info.jsx
-import React, { useState,useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-/** ---------------------- 1. 모달 컴포넌트 (VideoModal) ---------------------- */
-function VideoModal({ videoTitle, isOpen, onClose }) {
-  if (!isOpen) return null;
-
-  return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 1000,
-      }}
-    >
-      <div
-        style={{
-          width: 900,
-          height: 600,
-          background: "white",
-          borderRadius: 20,
-          padding: 30,
-          position: "relative",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-        }}
-      >
-        <h2 style={{ fontSize: 36, fontWeight: 600, marginBottom: 20 }}>
-          {videoTitle} 영상 정보
-        </h2>
-
-        <div
-          style={{
-            width: "100%",
-            height: 400,
-            backgroundColor: "#333",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            color: "white",
-            fontSize: 24,
-            borderRadius: 10,
-            marginBottom: 20,
-          }}
-        >
-          [여기에 비디오 플레이어 삽입]
-        </div>
-
-        <button
-          onClick={onClose}
-          style={{
-            position: "absolute",
-            top: 20,
-            right: 30,
-            background: "none",
-            border: "none",
-            fontSize: 30,
-            cursor: "pointer",
-            color: "#555",
-          }}
-        >
-          &times;
-        </button>
-
-        <div style={{ fontSize: 18, color: "#666" }}>
-          <b>탐지 시간:</b> 2025-11-25 10:30:00<br />
-          <b>파일 크기:</b> 150MB
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/** ---------------------- 2. 영상 목록 아이템 ---------------------- */
-function VideoItem({ top, title, onVideoClick }) {
-  const leftBase = title.includes("우측") ? 612 : 24;
-
-  return (
-    <>
-      <div
-        style={{
-          width: 550,
-          height: 107,
-          left: leftBase,
-          top,
-          position: "absolute",
-          background: "#D9D9D9",
-          borderRadius: 20,
-          cursor: "pointer",
-        }}
-       // onClick={() => onVideoClick(title)}
-      />
-
-      {/* 썸네일 */}
-      <div
-        style={{
-          width: 80,
-          height: 80,
-          left: leftBase + 13,
-          top: top + 14,
-          position: "absolute",
-          background: "rgba(0,0,0,0.25)",
-          borderRadius: 20,
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          left: leftBase + 33,
-          top: top + 47,
-          fontSize: 15,
-          fontWeight: 300,
-        }}
-      >
-        썸네일
-      </div>
-
-      {/* 제목 */}
-      <div
-        style={{
-          position: "absolute",
-          left: leftBase + 150,
-          top: top + 47,
-          fontSize: 15,
-          fontWeight: 300,
-        }}
-      >
-        {title}
-      </div>
-
-      {/* 영상 확인 버튼 */}
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          onVideoClick(title);
-        }}
-        style={{
-          width: 105,
-          height: 45,
-          left: leftBase + 433,
-          top: top + 30,
-          position: "absolute",
-          background: "rgba(13,108,251,0.36)",
-          borderRadius: 20,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-        }}
-      >
-        <div style={{ fontSize: 13, fontWeight: 300 }}>경위서 작성</div>
-      </div>
-    </>
-  );
-}
-
-/** ---------------------- 3. 메인 컴포넌트 ---------------------- */
 export default function WriteInfo() {
   const navigate = useNavigate();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedVideoTitle, setSelectedVideoTitle] = useState("");
+  const [report, setReport] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleVideoClick = (title) => {
-    setSelectedVideoTitle(title);
-    setIsModalOpen(true);
-  };
-  const [videoData, setVideoData] = useState([]);
-  
+  // 페이지 들어올 때 가장 최근 IncidentReport 불러오기
   useEffect(() => {
-   async function fetchVideos() {
-    try {
-      const res = await fetch('/api/videos');   // 아직 존재하지 않아도 됨
-      if (!res.ok) throw new Error("API 응답 오류");
-      const data = await res.json();
+    (async () => {
+      try {
+        const res = await fetch("/api/report/latest");
+        if (res.status === 204) {
+          setError("아직 생성된 경위서가 없습니다.");
+          return;
+        }
+        if (!res.ok) {
+          throw new Error("서버 응답 오류");
+        }
+        const data = await res.json();
+        setReport(data);
+      } catch (e) {
+        console.error("경위서 불러오기 실패:", e);
+        setError("경위서를 불러오는 중 오류가 발생했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
-      // 서버에서 ["좌측", "우측"] 이런 title만 주는 경우가 있으니 여기서 UI용 처리도 가능
-      setVideoData(data);
-
-    } catch (err) {
-      console.error(" 영상 목록 불러오기 실패:", err);
-      // 실패해도 화면은 기존처럼 빈 상태 + 오류 없음
-    }
-  }
-
-  fetchVideos();
-}, []);
   return (
     <div
       style={{
@@ -257,81 +96,106 @@ export default function WriteInfo() {
         alt="홈"
       />
 
-      {/* 검색창 */}
+      {/* 제목 */}
       <div
         style={{
-          width: 1138,
-          height: 47,
-          left: 24,
-          top: 136,
+          left: 60,
+          top: 145,
           position: "absolute",
-          background: "#D9D9D9",
-          borderRadius: 20,
-        }}
-      />
-
-      {/* 검색 아이콘 */}
-      <img
-        src="image_file/search_icon.png"
-        style={{
-          width: 25,
-          height: 25,
-          left: 42,
-          top: 148,
-          position: "absolute",
-        }}
-      />
-
-      {/* 영상 리스트 */}
-      {videoData.map((v) => (
-        <VideoItem key={v.id} top={v.top} title={v.title} onVideoClick={handleVideoClick} />
-      ))}
-
-      {/* 페이지네이션 */}
-      <div
-        style={{
-          left: 507,
-          top: 752,
-          position: "absolute",
-          fontSize: 30,
-          fontWeight: 300,
+          fontSize: 28,
+          fontWeight: 600,
         }}
       >
-        1&nbsp;&nbsp;2&nbsp;&nbsp;3&nbsp;&nbsp;4&nbsp;&nbsp;5
+        자동 출동 경위서
       </div>
 
-      <img
-        src="image_file/left_bar.png"
+      {/* 정보/본문 박스 */}
+      <div
         style={{
-          width: 30,
-          height: 55,
-          left: 464,
-          top: 740,
+          width: 1160,
+          height: 560,
+          left: 60,
+          top: 190,
           position: "absolute",
-          cursor: "pointer",
+          background: "#F2F2F2",
+          borderRadius: 20,
+          padding: 24,
+          boxSizing: "border-box",
+          overflowY: "auto",
         }}
-        alt="이전"
-      />
+      >
+        {loading && <div style={{ fontSize: 18 }}>경위서를 불러오는 중입니다...</div>}
 
-      <img
-        src="image_file/right_bar.png"
-        style={{
-          width: 23,
-          height: 44,
-          left: 670,
-          top: 747,
-          position: "absolute",
-          cursor: "pointer",
-        }}
-        alt="다음"
-      />
+        {!loading && error && (
+          <div style={{ fontSize: 18, color: "#D46464" }}>{error}</div>
+        )}
 
-      {/* 모달 */}
-      <VideoModal
-        videoTitle={selectedVideoTitle}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+        {!loading && !error && report && (
+          <>
+            {/* 사건 기본 정보 */}
+            <div style={{ marginBottom: 20, fontSize: 16, color: "#555" }}>
+              <div>
+                <b>이벤트 ID:</b> {report.eventId}
+              </div>
+              <div>
+                <b>카메라 ID:</b> {report.cameraId}
+              </div>
+              <div>
+                <b>감지 객체:</b> {report.detectedClass}
+              </div>
+              <div>
+                <b>위험도:</b> {report.dangerLevel}
+              </div>
+              <div>
+                <b>영상 다운로드:</b>{" "}
+                <a
+                  href={report.videoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ color: "#0D6CFB" }}
+                >
+                  {report.videoUrl}
+                </a>
+              </div>
+            </div>
+
+            {/* 요약 */}
+            {report.summary && (
+              <div
+                style={{
+                  marginBottom: 20,
+                  padding: 12,
+                  background: "white",
+                  borderRadius: 12,
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+                  fontSize: 15,
+                  color: "#333",
+                }}
+              >
+                <b>요약</b>
+                <div style={{ marginTop: 8, whiteSpace: "pre-line" }}>
+                  {report.summary}
+                </div>
+              </div>
+            )}
+
+            {/* 전체 경위서 */}
+            <div
+              style={{
+                padding: 16,
+                background: "white",
+                borderRadius: 12,
+                boxShadow: "0 2px 4px rgba(0,0,0,0.08)",
+                fontSize: 15,
+                color: "#222",
+                whiteSpace: "pre-line", // 줄바꿈 유지
+              }}
+            >
+              {report.report}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
