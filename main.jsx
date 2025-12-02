@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState , useRef} from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import Home from './home.jsx';
@@ -9,12 +9,14 @@ import WarningInfo from './src/warning_info.jsx';
 import WriteInfo from './src/write_down.jsx';
 import './app.css';
 import TutorialPopup from './src/TutorialPopup.jsx';
+import alertSound from "./image_file/alert-sound.mp3";
 
 
 
 /** ---------- 알림 상태 훅 ---------- */
 function useAlertState() {
   const [isAlert, setIsAlert] = useState(false);
+  const audioRef = useRef(null);
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -56,7 +58,6 @@ function NormalLayout() {
   const navigate = useNavigate();
   // 튜토리얼 팝업 창 함수
   const [showTutorial, setShowTutorial] = useState(false);
-
   const handleOpenTutorial = () => setShowTutorial(true);
   const handleCloseTutorial = () => setShowTutorial(false);
   // 
@@ -211,6 +212,23 @@ function NormalLayout() {
 // alert 상태
 function AlertLayout() {
   const navigate = useNavigate();
+// 사운드 재생 로직
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(err => {
+          console.log("브라우저 자동재생 차단:", err);
+        });
+      }
+    }
+  }, []);
+  // 끝
+
 // 추가 시작 (튜토리얼 상태 관리)
   const [showTutorial, setShowTutorial] = useState(false); 
 
@@ -238,7 +256,10 @@ function AlertLayout() {
     <>
     <div style={{ width: 1280, height: 800, position: 'relative', background: 'white', overflow: 'hidden' }}>
 
-      {/* ===== 오른쪽 패널 1 ===== */}
+    {/* ====================== 추가: 실제 소리 재생 태그 ====================== */}
+        <audio ref={audioRef} src={alertSound} preload="auto" />
+        {/* ======================================================================= */}
+    {/* ===== 오른쪽 패널 1 ===== */}
       <div style={{
         width: 550, height: 120, left: 640, top: 136,
         position: 'absolute', background: '#D9D9D9', borderRadius: 20
