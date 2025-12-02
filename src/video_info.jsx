@@ -1,8 +1,8 @@
 // src/video_info.jsx
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-/** ---------------------- 1. 모달 컴포넌트 (VideoModal) ---------------------- */
+/* ---------------------- 1. 모달 ---------------------- */
 function VideoModal({ videoTitle, isOpen, onClose }) {
   if (!isOpen) return null;
 
@@ -29,7 +29,6 @@ function VideoModal({ videoTitle, isOpen, onClose }) {
           borderRadius: 20,
           padding: 30,
           position: "relative",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
         }}
       >
         <h2 style={{ fontSize: 36, fontWeight: 600, marginBottom: 20 }}>
@@ -41,13 +40,12 @@ function VideoModal({ videoTitle, isOpen, onClose }) {
             width: "100%",
             height: 400,
             backgroundColor: "#333",
+            borderRadius: 10,
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             color: "white",
             fontSize: 24,
-            borderRadius: 10,
-            marginBottom: 20,
           }}
         >
           [여기에 비디오 플레이어 삽입]
@@ -59,27 +57,22 @@ function VideoModal({ videoTitle, isOpen, onClose }) {
             position: "absolute",
             top: 20,
             right: 30,
-            background: "none",
-            border: "none",
             fontSize: 30,
+            border: "none",
+            background: "none",
             cursor: "pointer",
-            color: "#555",
           }}
         >
           &times;
         </button>
-
-        <div style={{ fontSize: 18, color: "#666" }}>
-          <b>탐지 시간:</b> 2025-11-25 10:30:00<br />
-          <b>파일 크기:</b> 150MB
-        </div>
       </div>
     </div>
   );
 }
 
-/** ---------------------- 2. 영상 목록 아이템 ---------------------- */
-function VideoItem({ top, title, onVideoClick }) {
+/* ---------------------- 2. 영상 목록 아이템 ---------------------- */
+function VideoItem({ index, title, onVideoClick }) {
+  const top = 215 + index * 130 + 20;
   const leftBase = title.includes("우측") ? 612 : 24;
 
   return (
@@ -89,13 +82,12 @@ function VideoItem({ top, title, onVideoClick }) {
           width: 550,
           height: 107,
           left: leftBase,
-          top,
+          top: top,
           position: "absolute",
           background: "#D9D9D9",
           borderRadius: 20,
           cursor: "pointer",
         }}
-       // onClick={() => onVideoClick(title)}
       />
 
       {/* 썸네일 */}
@@ -112,11 +104,10 @@ function VideoItem({ top, title, onVideoClick }) {
       />
       <div
         style={{
-          position: "absolute",
           left: leftBase + 33,
           top: top + 47,
+          position: "absolute",
           fontSize: 15,
-          fontWeight: 300,
         }}
       >
         썸네일
@@ -125,11 +116,10 @@ function VideoItem({ top, title, onVideoClick }) {
       {/* 제목 */}
       <div
         style={{
-          position: "absolute",
           left: leftBase + 150,
           top: top + 47,
+          position: "absolute",
           fontSize: 15,
-          fontWeight: 300,
         }}
       >
         {title}
@@ -137,10 +127,7 @@ function VideoItem({ top, title, onVideoClick }) {
 
       {/* 영상 확인 버튼 */}
       <div
-        onClick={(e) => {
-          e.stopPropagation();
-          onVideoClick(title);
-        }}
+        onClick={() => onVideoClick(title)}
         style={{
           width: 105,
           height: 45,
@@ -155,43 +142,44 @@ function VideoItem({ top, title, onVideoClick }) {
           cursor: "pointer",
         }}
       >
-        <div style={{ fontSize: 15, fontWeight: 300 }}>영상 확인</div>
+        <div style={{ fontSize: 15 }}>영상 확인</div>
       </div>
     </>
   );
 }
 
-/** ---------------------- 3. 메인 컴포넌트 ---------------------- */
+/* ---------------------- 3. 메인 ---------------------- */
 export default function VideoInfo() {
   const navigate = useNavigate();
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedVideoTitle, setSelectedVideoTitle] = useState("");
+  const [videoData, setVideoData] = useState([]);
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  const handleOpenTutorial = () => {
+    setShowTutorial(true);
+  };
 
   const handleVideoClick = (title) => {
     setSelectedVideoTitle(title);
     setIsModalOpen(true);
   };
-  const [videoData, setVideoData] = useState([]);
-  
+
   useEffect(() => {
-   async function fetchVideos() {
-    try {
-      const res = await fetch('/api/videos');   // 아직 존재하지 않아도 됨
-      if (!res.ok) throw new Error("API 응답 오류");
-      const data = await res.json();
-
-      // 서버에서 ["좌측", "우측"] 이런 title만 주는 경우가 있으니 여기서 UI용 처리도 가능
-      setVideoData(data);
-
-    } catch (err) {
-      console.error(" 영상 목록 불러오기 실패:", err);
-      // 실패해도 화면은 기존처럼 빈 상태 + 오류 없음
+    async function fetchVideos() {
+      try {
+        const res = await fetch("/api/videos");
+        if (!res.ok) throw new Error("API 오류 발생");
+        const data = await res.json();
+        setVideoData(data);
+      } catch (err) {
+        console.error("영상 목록 불러오기 실패:", err);
+      }
     }
-  }
 
-  fetchVideos();
-}, []);
+    fetchVideos();
+  }, []);
+
   return (
     <div
       style={{
@@ -201,7 +189,6 @@ export default function VideoInfo() {
         position: "relative",
         background: "white",
         overflow: "hidden",
-        fontFamily: "Pretendard",
       }}
     >
       {/* 로고 */}
@@ -212,7 +199,6 @@ export default function VideoInfo() {
           top: 49,
           position: "absolute",
           fontSize: 50,
-          fontWeight: 300,
           cursor: "pointer",
         }}
       >
@@ -223,28 +209,31 @@ export default function VideoInfo() {
       <div
         style={{
           width: "100%",
-          height: 0,
           top: 116,
-          position: "absolute",
           borderTop: "1px solid black",
+          position: "absolute",
         }}
       />
 
-      {/* 아이콘 */}
+      {/* 가이드 아이콘 */}
       <img
         src="image_file/guide_icon.png"
+        onClick={handleOpenTutorial}
         style={{
           width: 69,
           height: 69,
           left: 1104,
           top: 26,
           position: "absolute",
+          cursor: "pointer",
+          zIndex: 2000,
         }}
-        alt="가이드"
       />
 
+      {/* 홈 */}
       <img
         src="image_file/home_icon.png"
+        onClick={() => navigate("/main-page")}
         style={{
           width: 100,
           height: 100,
@@ -253,8 +242,6 @@ export default function VideoInfo() {
           position: "absolute",
           cursor: "pointer",
         }}
-        onClick={() => navigate("/main-page")}
-        alt="홈"
       />
 
       {/* 검색창 */}
@@ -282,49 +269,15 @@ export default function VideoInfo() {
         }}
       />
 
-      {/* 영상 리스트 */}
-      {videoData.map((v) => (
-        <VideoItem key={v.id} top={v.top} title={v.title} onVideoClick={handleVideoClick} />
+      {/* 영상 목록 */}
+      {videoData.map((v, i) => (
+        <VideoItem
+          key={v.id}
+          index={i}
+          title={v.title}
+          onVideoClick={handleVideoClick}
+        />
       ))}
-
-      {/* 페이지네이션 */}
-      <div
-        style={{
-          left: 507,
-          top: 752,
-          position: "absolute",
-          fontSize: 30,
-          fontWeight: 300,
-        }}
-      >
-        1&nbsp;&nbsp;2&nbsp;&nbsp;3&nbsp;&nbsp;4&nbsp;&nbsp;5
-      </div>
-
-      <img
-        src="image_file/left_bar.png"
-        style={{
-          width: 30,
-          height: 55,
-          left: 464,
-          top: 740,
-          position: "absolute",
-          cursor: "pointer",
-        }}
-        alt="이전"
-      />
-
-      <img
-        src="image_file/right_bar.png"
-        style={{
-          width: 23,
-          height: 44,
-          left: 670,
-          top: 747,
-          position: "absolute",
-          cursor: "pointer",
-        }}
-        alt="다음"
-      />
 
       {/* 모달 */}
       <VideoModal
