@@ -6,7 +6,7 @@ const steps = [
     // ... (steps 배열 내용 유지) ...
     {
         title: "SMARTSHIELD에 오신 것을 환영합니다!",
-        content: "지금부터 안전 관제 시스템 사용법을 간단히 알려드릴게요.",
+        content: "지금부터 스마트실드 사용법을 간단히 알려드릴게요.",
         type: 'default', // 일반 텍스트 타입
         image: "image_file/popup_bird.png" // 예시 이미지 
     },
@@ -24,7 +24,7 @@ const steps = [
         title: "튜토리얼 완료!",
         content: "이제 SMARTSHIELD를 사용해 보세요. 궁금한 점은 상단의 가이드 아이콘을 다시 눌러주세요.",
         type: 'default',
-        image: "image_file/popup_bird_2.png"
+        image: "image_file/bird_1.png"
     },
 ];
 
@@ -103,7 +103,7 @@ export default function TutorialPopup({ onClose }) {
                             dangerouslySetInnerHTML={{ __html: step.content }} 
                         />
                         {step.image && (
-                            <img src={step.image} alt="step" style={{ height: 430, marginTop: 20 }} />
+                            <img src={step.image} alt="step" style={{ height: 320,  objectFit: 'contain',marginTop: 20 }} />
                         )}
                     </div>
                 );

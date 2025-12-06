@@ -1,79 +1,104 @@
-// src/video_info.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-/* ---------------------- 1. 모달 ---------------------- */
-function VideoModal({ videoTitle, isOpen, onClose }) {
-  if (!isOpen) return null;
+/* ---------------- Mock Data ---------------- */
+const mockEventList = [
+  {
+    id: 104,
+    event_id: "evt_20251128_002708",
+    camera_id: "live_demo_cam",
+    detected_class: "knife",
+    danger_level: "HIGH",
+    created_at: "2025-11-28T00:27:08",
+    video_url:
+      "https://smartshield-detections-dev.s3.ap-northeast-2.amazonaws.com/20251128/live_demo_cam/clips/evt_20251128_002708_knife_high.mp4",
+  },
+  {
+    id: 102,
+    event_id: "evt_20251128_002639",
+    camera_id: "live_demo_cam",
+    detected_class: "knife",
+    danger_level: "HIGH",
+    created_at: "2025-11-28T00:26:39",
+    video_url:
+      "https://smartshield-detections-dev.s3.ap-northeast-2.amazonaws.com/20251128/live_demo_cam/clips/evt_20251128_002639_knife_high.mp4",
+  },
+  {
+    id: 101,
+    event_id: "evt_20251128_002622",
+    camera_id: "live_demo_cam",
+    detected_class: "knife",
+    danger_level: "HIGH",
+    created_at: "2025-11-28T00:26:22",
+    video_url:
+      "https://smartshield-detections-dev.s3.ap-northeast-2.amazonaws.com/20251128/live_demo_cam/clips/evt_20251128_002622_knife_high.mp4",
+  },
+  {
+    id: 105,
+    event_id: "evt_20251127_233407",
+    camera_id: "live_demo_cam",
+    detected_class: "knife",
+    danger_level: "HIGH",
+    created_at: "2025-11-27T23:34:07",
+    video_url:
+      "https://smartshield-detections-dev.s3.ap-northeast-2.amazonaws.com/20251127/live_demo_cam/clips/evt_20251127_233407_knife_high.mp4",
+  },
+  {
+    id: 103,
+    event_id: "evt_20251127_232633",
+    camera_id: "live_demo_cam",
+    detected_class: "knife",
+    danger_level: "HIGH",
+    created_at: "2025-11-27T23:26:33",
+    video_url:
+      "https://smartshield-detections-dev.s3.ap-northeast-2.amazonaws.com/20251127/live_demo_cam/clips/evt_20251127_232633_knife_high.mp4",
+  },
+  {
+    id: 106,
+    event_id: "evt_20251126_230539",
+    camera_id: "live_demo_cam",
+    detected_class: "guns",
+    danger_level: "HIGH",
+    created_at: "2025-11-26T23:05:39",
+    video_url:
+      "https://smartshield-detections-dev.s3.ap-northeast-2.amazonaws.com/20251126/live_demo_cam/clips/evt_20251126_230539_guns_high.mp4",
+  },
+  {
+    id: 107,
+    event_id: "evt_20251123_193342",
+    camera_id: "live_demo_cam",
+    detected_class: "guns",
+    danger_level: "HIGH",
+    created_at: "2025-11-23T19:33:42",
+    video_url:
+      "https://smartshield-detections-dev.s3.ap-northeast-2.amazonaws.com/20251123/live_demo_cam/clips/evt_20251123_193342_guns_high.mp4",
+  },
+];
 
-  return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 1000,
-      }}
-    >
-      <div
-        style={{
-          width: 900,
-          height: 600,
-          background: "white",
-          borderRadius: 20,
-          padding: 30,
-          position: "relative",
-        }}
-      >
-        <h2 style={{ fontSize: 36, fontWeight: 600, marginBottom: 20 }}>
-          {videoTitle} 영상 정보
-        </h2>
+/* ------------------------------------------- */
+/* 2. 리스트 아이템 (레이아웃 그대로 유지) */
+/* ------------------------------------------- */
 
-        <div
-          style={{
-            width: "100%",
-            height: 400,
-            backgroundColor: "#333",
-            borderRadius: 10,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            color: "white",
-            fontSize: 24,
-          }}
-        >
-          [여기에 비디오 플레이어 삽입]
-        </div>
+function VideoItem({ index, event }) {
+  const column = index % 2;
+  const row = Math.floor(index / 2);
+  const leftBase = column === 1 ? 612 : 24;
+  const top = 215 + row * 130 + 20;
 
-        <button
-          onClick={onClose}
-          style={{
-            position: "absolute",
-            top: 20,
-            right: 30,
-            fontSize: 30,
-            border: "none",
-            background: "none",
-            cursor: "pointer",
-          }}
-        >
-          &times;
-        </button>
-      </div>
-    </div>
-  );
-}
+  const dangerColor = {
+    HIGH: "rgba(255,100,100,0.5)",
+    MEDIUM: "rgba(255,200,100,0.5)",
+    LOW: "rgba(0,0,0,0.25)",
+  };
 
-/* ---------------------- 2. 영상 목록 아이템 ---------------------- */
-function VideoItem({ index, title, onVideoClick }) {
-  const top = 215 + index * 130 + 20;
-  const leftBase = title.includes("우측") ? 612 : 24;
+  const downloadVideo = () => {
+    const link = document.createElement("a");
+    link.href = event.video_url;
+    link.download = `${event.event_id}.mp4`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <>
@@ -82,11 +107,10 @@ function VideoItem({ index, title, onVideoClick }) {
           width: 550,
           height: 107,
           left: leftBase,
-          top: top,
+          top,
           position: "absolute",
           background: "#D9D9D9",
           borderRadius: 20,
-          cursor: "pointer",
         }}
       />
 
@@ -98,36 +122,41 @@ function VideoItem({ index, title, onVideoClick }) {
           left: leftBase + 13,
           top: top + 14,
           position: "absolute",
-          background: "rgba(0,0,0,0.25)",
+          background: dangerColor[event.danger_level],
           borderRadius: 20,
         }}
       />
+
+      {/* 위험도 텍스트 */}
       <div
         style={{
           left: leftBase + 33,
           top: top + 47,
           position: "absolute",
           fontSize: 15,
+          fontWeight: "bold",
         }}
       >
-        썸네일
+        {event.danger_level}
       </div>
 
-      {/* 제목 */}
+      {/* 이벤트 ID */}
       <div
         style={{
-          left: leftBase + 150,
+          left: leftBase + 110,
           top: top + 47,
           position: "absolute",
           fontSize: 15,
+          fontWeight: "bold",
+          width: 300,
         }}
       >
-        {title}
+        {event.event_id}
       </div>
 
-      {/* 영상 확인 버튼 */}
+      {/* 다운로드 버튼 */}
       <div
-        onClick={() => onVideoClick(title)}
+        onClick={downloadVideo}
         style={{
           width: 105,
           height: 45,
@@ -140,45 +169,37 @@ function VideoItem({ index, title, onVideoClick }) {
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",
+          zIndex: 10,
         }}
       >
-        <div style={{ fontSize: 15 }}>영상 확인</div>
+        <div style={{ fontSize: 15 }}>다운로드</div>
       </div>
     </>
   );
 }
 
-/* ---------------------- 3. 메인 ---------------------- */
+/* ------------------------------------------- */
+/* 3. 메인 화면 (검색 기능 포함) */
+/* ------------------------------------------- */
+
 export default function VideoInfo() {
   const navigate = useNavigate();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedVideoTitle, setSelectedVideoTitle] = useState("");
   const [videoData, setVideoData] = useState([]);
-  const [showTutorial, setShowTutorial] = useState(false);
-
-  const handleOpenTutorial = () => {
-    setShowTutorial(true);
-  };
-
-  const handleVideoClick = (title) => {
-    setSelectedVideoTitle(title);
-    setIsModalOpen(true);
-  };
+  const [searchValue, setSearchValue] = useState("");
 
   useEffect(() => {
-    async function fetchVideos() {
-      try {
-        const res = await fetch("/api/videos");
-        if (!res.ok) throw new Error("API 오류 발생");
-        const data = await res.json();
-        setVideoData(data);
-      } catch (err) {
-        console.error("영상 목록 불러오기 실패:", err);
-      }
-    }
-
-    fetchVideos();
+    setVideoData(mockEventList);
   }, []);
+
+  /* ---- 검색 필터 ---- */
+  const filteredList = videoData.filter((e) => {
+    const q = searchValue.toLowerCase();
+    return (
+      e.event_id.toLowerCase().includes(q) ||
+      e.camera_id.toLowerCase().includes(q) ||
+      e.detected_class.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div
@@ -191,7 +212,7 @@ export default function VideoInfo() {
         overflow: "hidden",
       }}
     >
-      {/* 로고 */}
+      {/* ------------------ 로고 ------------------ */}
       <div
         onClick={() => navigate("/main-page")}
         style={{
@@ -205,7 +226,6 @@ export default function VideoInfo() {
         SMARTSHIELD
       </div>
 
-      {/* 상단 라인 */}
       <div
         style={{
           width: "100%",
@@ -215,10 +235,9 @@ export default function VideoInfo() {
         }}
       />
 
-      {/* 가이드 아이콘 */}
+      {/* ------------------ 가이드 아이콘 ------------------ */}
       <img
         src="image_file/guide_icon.png"
-        onClick={handleOpenTutorial}
         style={{
           width: 69,
           height: 69,
@@ -228,9 +247,10 @@ export default function VideoInfo() {
           cursor: "pointer",
           zIndex: 2000,
         }}
+        alt=""
       />
 
-      {/* 홈 */}
+      {/* ------------------ 홈 아이콘 ------------------ */}
       <img
         src="image_file/home_icon.png"
         onClick={() => navigate("/main-page")}
@@ -242,9 +262,10 @@ export default function VideoInfo() {
           position: "absolute",
           cursor: "pointer",
         }}
+        alt=""
       />
 
-      {/* 검색창 */}
+      {/* ------------------ 검색창 ------------------ */}
       <div
         style={{
           width: 1138,
@@ -254,6 +275,24 @@ export default function VideoInfo() {
           position: "absolute",
           background: "#D9D9D9",
           borderRadius: 20,
+        }}
+      />
+
+      {/* 검색 입력 */}
+      <input
+        value={searchValue}
+        onChange={(e) => setSearchValue(e.target.value)}
+        placeholder="이벤트 ID, 카메라 ID, 감지 객체로 검색..."
+        style={{
+          left: 80,
+          top: 145,
+          position: "absolute",
+          width: 1000,
+          height: 30,
+          border: "none",
+          background: "transparent",
+          outline: "none",
+          fontSize: 18,
         }}
       />
 
@@ -267,24 +306,13 @@ export default function VideoInfo() {
           top: 148,
           position: "absolute",
         }}
+        alt=""
       />
 
-      {/* 영상 목록 */}
-      {videoData.map((v, i) => (
-        <VideoItem
-          key={v.id}
-          index={i}
-          title={v.title}
-          onVideoClick={handleVideoClick}
-        />
+      {/* ------------------ 리스트 ------------------ */}
+      {filteredList.map((event, i) => (
+        <VideoItem key={event.id} index={i} event={event} />
       ))}
-
-      {/* 모달 */}
-      <VideoModal
-        videoTitle={selectedVideoTitle}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
     </div>
   );
 }
